@@ -1,4 +1,4 @@
-package com.example.sensors;
+package com.jwg.sensors;
 
 import android.content.Context;
 

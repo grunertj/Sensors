@@ -1,4 +1,4 @@
-package com.example.sensors;
+package com.jwg.sensors;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.example.sensors;
+package com.jwg.sensors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,26 +10,89 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import  com.jwg.sensors.R;
+
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.GZIPOutputStream;
+
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener , LocationListener {
     TextView textView,textViewX,textViewY,textViewZ,textViewT;
     Button buttonStart, buttonStop;
     SensorManager sensorManager;
     Sensor accelerometer, gyroscope;
+    String sensor_filename = null;
+
+    static BufferedWriter sensor_file = null;
+
+    static final String directory_name = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
+            + File.separator + "PaddleSensorBis";
+
+    public String getCurrentTimeStamp() {
+        return new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
+    }
+
+    public String getAbsoluteFileName(String filename) {
+        File path = new File(directory_name);
+        if (filename.matches(path.toString())) {
+            return filename;
+        } else {
+            return (path.toString() + File.separator + filename);
+        }
+    }
 
     void sensor(boolean enabled) {
         if (enabled) {
-            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-            sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_NORMAL);
+            sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+            sensorManager.registerListener(this, gyroscope, SensorManager.SENSOR_DELAY_GAME);
         } else {
             sensorManager.unregisterListener(this,accelerometer);
             sensorManager.unregisterListener(this,gyroscope);
+        }
+    }
+
+    void sensor_logging(boolean enabled) {
+        if (enabled) {
+            sensor_filename = String.format("%s-%s.csv.gz", "sensor", getCurrentTimeStamp());
+            try {
+                sensor_file = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(getAbsoluteFileName(sensor_filename)))));
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), "Could not open file: "+ "" + e + " " + getAbsoluteFileName(sensor_filename), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+            try {
+                sensor_file.append("Time,Sensor,X,Y,Z\n");
+            } catch (IOException e) {
+                Toast.makeText(getApplicationContext(), "Could not append to file: "+ "" + e + " " + getAbsoluteFileName(sensor_filename), Toast.LENGTH_LONG).show();
+                e.printStackTrace();
+            }
+        } else {
+            if (sensor_file != null) {
+                try {
+                    sensor_file.flush();
+                    sensor_file.close();
+                    sensor_file = null;
+                } catch (IOException e) {
+                    Toast.makeText(getApplicationContext(), "Could not close file: "+ "" + e + " " + getAbsoluteFileName(sensor_filename), Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -37,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         textView = (TextView) findViewById(R.id.textView);
         textViewX = (TextView) findViewById(R.id.textViewX);
         textViewY = (TextView) findViewById(R.id.textViewY);
@@ -49,11 +113,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION); // 10
         gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE); // 4
 
+        File directory = new File(directory_name);
+        if (directory.exists() == false) {
+            boolean success = directory.mkdir();
+            if (!success) {
+                Toast.makeText(getApplicationContext(), "Could not create directory: "+ directory_name, Toast.LENGTH_LONG).show();
+            }
+        }
+
         buttonStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 textView.setText("Start");
                 buttonStart.setEnabled(false);
                 buttonStop.setEnabled(true);
+                sensor_logging(true);
                 sensor(true);
             }
         });
@@ -64,6 +137,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
                 sensor(false);
+                sensor_logging(false);
             }
         });
     }
@@ -79,9 +153,15 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         timestamp = sensorEvent.timestamp;
         value = sensorEvent.values.clone();
-        //event_type = String.format("%d,%ld,%.8f,%.8f,%.8f",sensor_type,timestamp,value[0],value[1],value[2]);
-        event_type = String.format(Locale.US,"%d,%d",sensor_type,timestamp);
-
+        event_type = String.format(Locale.US,"%d,%d,%.8f,%.8f,%.8f\n",timestamp,sensor_type,value[0],value[1],value[2]);
+        try {
+            if (event_type!=null) {
+                sensor_file.append(event_type);
+            }
+        } catch (IOException e) {
+            Toast.makeText(getApplicationContext(), "Could append to file: "+ "" + e + " " + getAbsoluteFileName(sensor_filename), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
 
         textViewT.setText(event_type);
 
