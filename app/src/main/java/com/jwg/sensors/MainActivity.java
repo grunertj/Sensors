@@ -10,10 +10,13 @@ import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,7 +36,8 @@ import java.util.zip.GZIPOutputStream;
 
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener , LocationListener {
-    TextView textView,textViewX,textViewY,textViewZ,textViewT;
+    TextView textView,textViewX,textViewY,textViewZ,textViewT,textViewF;
+    Chronometer chronometer;
     Button buttonStart, buttonStop;
     SensorManager sensorManager;
     Sensor accelerometer, gyroscope;
@@ -106,8 +110,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         textViewY = (TextView) findViewById(R.id.textViewY);
         textViewZ = (TextView) findViewById(R.id.textViewZ);
         textViewT = (TextView) findViewById(R.id.textViewT);
+        textViewF = (TextView) findViewById(R.id.textViewF);
         buttonStart = (Button) findViewById(R.id.start);
         buttonStop = (Button) findViewById(R.id.stop);
+        chronometer = (Chronometer) findViewById(R.id.chronometer);
         textView.setText("Jens der aller Beste!");
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION); // 10
@@ -128,6 +134,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 buttonStop.setEnabled(true);
                 sensor_logging(true);
                 sensor(true);
+                textViewF.setText(sensor_filename);
+                chronometer.setBase(SystemClock.elapsedRealtime());
+                chronometer.start();
             }
         });
 
@@ -138,6 +147,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 buttonStart.setEnabled(true);
                 sensor(false);
                 sensor_logging(false);
+                chronometer.stop();
             }
         });
     }
@@ -163,16 +173,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             e.printStackTrace();
         }
 
-        textViewT.setText(event_type);
+        textViewT.setText(String.format(Locale.US,"%d",timestamp));
 
         switch (sensor_type) {
             case Sensor.TYPE_LINEAR_ACCELERATION:
                 textViewX.setText(String.format(Locale.US,"%.8f",value[0]));
-                textViewY.setText(String.format(Locale.US,"%.8f",value[0]));
+                textViewY.setText(String.format(Locale.US,"%.8f",value[1]));
                 textViewZ.setText(String.format(Locale.US,"%.8f",value[2]));
-                textView.setText("Accelerometer");
+                textView.setText("TYPE_LINEAR_ACCELERATION");
                 break;
             case Sensor.TYPE_GYROSCOPE:
+                textViewX.setText(String.format(Locale.US,"%.8f",value[0]));
+                textViewY.setText(String.format(Locale.US,"%.8f",value[1]));
+                textViewZ.setText(String.format(Locale.US,"%.8f",value[2]));
                 textView.setText("TYPE_GYROSCOPE");
                 break;
             default:
