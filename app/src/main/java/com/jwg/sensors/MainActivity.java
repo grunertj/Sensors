@@ -2,13 +2,17 @@ package com.jwg.sensors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.FileProvider;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
@@ -100,6 +104,22 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         }
     }
 
+    public void openFolder() {
+        //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        //Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() +  File.separator + "" + File.separator);
+       // Uri uri = Uri.parse(getAbsoluteFileName(sensor_filename));
+        //intent.setDataAndType(uri, "text/csv");
+        //startActivity(Intent.createChooser(intent, "Open folder"));
+
+        String path = Environment.getExternalStorageDirectory() + "/" + "Download" + "/PaddleSensorBis/";
+        path = getAbsoluteFileName(sensor_filename);
+        MediaScannerConnection.scanFile(getApplicationContext(), new String[]{getAbsoluteFileName(sensor_filename)}, null, null);
+        Uri uri = Uri.parse(path);
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, "*/*");
+        startActivity(intent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,12 +162,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         buttonStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                textView.setText("Stop");
+                textView.setText(getAbsoluteFileName(sensor_filename));
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
                 sensor(false);
                 sensor_logging(false);
                 chronometer.stop();
+                openFolder();
             }
         });
     }
