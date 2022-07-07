@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.example.sensors",
+  "applicationId": "com.jwg.sensors",
   "variantName": "release",
   "elements": [
     {
