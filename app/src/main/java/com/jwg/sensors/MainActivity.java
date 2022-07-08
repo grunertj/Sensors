@@ -44,13 +44,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.zip.GZIPOutputStream;
 
-
 public class MainActivity extends AppCompatActivity implements SensorEventListener, LocationListener {
     static final long MIN_TIME_IN_MILLISECONDS = 1000;
     static final float MIN_DISTANCE_IN_METERS = 1;
-    TextView textView, textViewX, textViewY, textViewZ, textViewT, textViewF;
+    TextView textView, textViewX, textViewY, textViewZ, textViewT, textViewF,textViewLabel;
     Chronometer chronometer;
-    Button buttonStart, buttonStop;
+    Button buttonStart, buttonStop, buttonShare;
     SensorManager sensorManager;
     LocationManager locationManager;
     Sensor accelerometer, gyroscope;
@@ -85,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                         Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
                 }, 1);
             }
+            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             locationManager.requestSingleUpdate(LocationManager.NETWORK_PROVIDER, this, null);
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, MIN_TIME_IN_MILLISECONDS, MIN_DISTANCE_IN_METERS, this);
             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, MIN_TIME_IN_MILLISECONDS, MIN_DISTANCE_IN_METERS, this);
@@ -150,7 +150,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         startActivity(intent);
     }
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -162,8 +161,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         textViewZ = (TextView) findViewById(R.id.textViewZ);
         textViewT = (TextView) findViewById(R.id.textViewT);
         textViewF = (TextView) findViewById(R.id.textViewF);
+        textViewLabel = (TextView) findViewById(R.id.textViewLabel);
         buttonStart = (Button) findViewById(R.id.start);
         buttonStop = (Button) findViewById(R.id.stop);
+        buttonShare = (Button) findViewById(R.id.share);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         textView.setText("Jens der aller Beste!");
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -179,8 +180,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }, 1);
         }
 
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         File directory = new File(directory_name);
         if (directory.exists() == false) {
             boolean success = directory.mkdir();
@@ -193,7 +192,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             public void onClick(View v) {
                 currentTimeStamp = getCurrentTimeStamp();
                 textView.setText("Start");
+                textViewLabel.setText("Sensor:");
                 buttonStart.setEnabled(false);
+                buttonShare.setEnabled(false);
                 buttonStop.setEnabled(true);
                 sensor_logging(true,currentTimeStamp);
                 sensor(true);
@@ -207,12 +208,20 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         buttonStop.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 textView.setText(getAbsoluteFileName(sensor_filename));
+                textViewLabel.setText("Filename:");
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
+                buttonShare.setEnabled(true);
                 sensor(false);
                 sensor_logging(false,null);
                 location(false);
                 chronometer.stop();
+            }
+        });
+
+        buttonShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
                 openFolder();
             }
         });
