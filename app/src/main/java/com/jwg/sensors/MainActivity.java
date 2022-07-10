@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     static final float MIN_DISTANCE_IN_METERS = 1;
     TextView textView, textViewX, textViewY, textViewZ, textViewT, textViewF,textViewLabel;
     Chronometer chronometer;
-    Button buttonStart, buttonStop, buttonShare;
+    Button buttonStart, buttonStop, buttonShare, buttonSend;
     SensorManager sensorManager;
     LocationManager locationManager;
     Sensor accelerometer, gyroscope;
@@ -144,9 +144,31 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String path = Environment.getExternalStorageDirectory() + "/" + "Download" + "/PaddleSensorBis/";
         path = getAbsoluteFileName(sensor_filename);
         MediaScannerConnection.scanFile(getApplicationContext(), new String[]{getAbsoluteFileName(sensor_filename)}, null, null);
-        Uri uri = Uri.parse(path);
+//        Uri uri = Uri.parse(path);
+        Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider",new File(getAbsoluteFileName(directory_name)));
+
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, "*/*");
+        startActivity(intent);
+    }
+
+    public void sendFile() {
+        //Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        //Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getPath() +  File.separator + "" + File.separator);
+        // Uri uri = Uri.parse(getAbsoluteFileName(sensor_filename));
+        //intent.setDataAndType(uri, "text/csv");
+        //startActivity(Intent.createChooser(intent, "Open folder"));
+
+        String path = Environment.getExternalStorageDirectory() + "/" + "Download" + "/PaddleSensorBis/";
+        path = getAbsoluteFileName(sensor_filename);
+        MediaScannerConnection.scanFile(getApplicationContext(), new String[]{getAbsoluteFileName(sensor_filename)}, null, null);
+        // Uri uri = Uri.parse(path);
+        // Uri uri = Uri.fromFile(new File(getAbsoluteFileName(sensor_filename)));
+        Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider",new File(getAbsoluteFileName(sensor_filename)));
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setDataAndType(uri, "*/*");
+        intent.putExtra(Intent.EXTRA_STREAM,uri);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(intent);
     }
 
@@ -165,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         buttonStart = (Button) findViewById(R.id.start);
         buttonStop = (Button) findViewById(R.id.stop);
         buttonShare = (Button) findViewById(R.id.share);
+        buttonSend = (Button) findViewById(R.id.send);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         textView.setText("Jens der aller Beste!");
         sensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -195,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 textViewLabel.setText("Sensor:");
                 buttonStart.setEnabled(false);
                 buttonShare.setEnabled(false);
+                buttonSend.setEnabled(false);
                 buttonStop.setEnabled(true);
                 sensor_logging(true,currentTimeStamp);
                 sensor(true);
@@ -212,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 buttonStop.setEnabled(false);
                 buttonStart.setEnabled(true);
                 buttonShare.setEnabled(true);
+                buttonSend.setEnabled(true);
                 sensor(false);
                 sensor_logging(false,null);
                 location(false);
@@ -225,6 +250,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 openFolder();
             }
         });
+
+        buttonSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendFile();
+            }
+        });
+
     }
 
     @Override
