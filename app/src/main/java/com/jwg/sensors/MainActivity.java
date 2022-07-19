@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.content.MimeTypeFilter;
 
 import android.Manifest;
 import android.content.Context;
@@ -145,10 +146,12 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         path = getAbsoluteFileName(sensor_filename);
         MediaScannerConnection.scanFile(getApplicationContext(), new String[]{getAbsoluteFileName(sensor_filename)}, null, null);
 //        Uri uri = Uri.parse(path);
-        Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider",new File(getAbsoluteFileName(directory_name)));
+        Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider",new File(getAbsoluteFileName(sensor_filename)));
 
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, "*/*");
+        //Intent j = Intent.createChooser(intent, "Choose an application to open with:");
+        //startActivity(j);
         startActivity(intent);
     }
 
@@ -166,7 +169,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Uri uri = Uri.fromFile(new File(getAbsoluteFileName(sensor_filename)));
         Uri uri = FileProvider.getUriForFile(MainActivity.this, BuildConfig.APPLICATION_ID + ".provider",new File(getAbsoluteFileName(sensor_filename)));
         Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setDataAndType(uri, "*/*");
+        intent.setDataAndType(uri, "application/zip");
         intent.putExtra(Intent.EXTRA_STREAM,uri);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         startActivity(intent);
