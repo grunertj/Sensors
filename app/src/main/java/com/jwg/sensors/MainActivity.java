@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 ActivityCompat.requestPermissions(MainActivity.this, new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                         Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
                 }, 1);
             }
@@ -203,7 +202,6 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ActivityCompat.requestPermissions(MainActivity.this, new String[] {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                     Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
             }, 1);
         }
@@ -218,6 +216,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         buttonStart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                File directory = new File(directory_name);
+                if (directory.exists() == false) {
+                    boolean success = directory.mkdir();
+                    if (!success) {
+                        Toast.makeText(getApplicationContext(), "Could not create directory: "+ directory_name, Toast.LENGTH_LONG).show();
+                    }
+                }
                 currentTimeStamp = getCurrentTimeStamp();
                 textView.setText("Start");
                 textViewLabel.setText("Sensor:");
