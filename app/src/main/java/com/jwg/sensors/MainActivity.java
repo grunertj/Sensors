@@ -82,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 ActivityCompat.requestPermissions(MainActivity.this, new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION,
                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                         Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
                 }, 1);
             }
@@ -202,6 +203,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             ActivityCompat.requestPermissions(MainActivity.this, new String[] {
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.MANAGE_EXTERNAL_STORAGE,
                     Manifest.permission.HIGH_SAMPLING_RATE_SENSORS
             }, 1);
         }
