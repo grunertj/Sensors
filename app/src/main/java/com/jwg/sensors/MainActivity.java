@@ -60,8 +60,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     static BufferedWriter sensor_file = null;
 
-    static final String directory_name = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString()
-            + File.separator + "PaddleSensorBis";
+    static final String directory_name = Environment.getExternalStorageDirectory().toString()
+            + File.separator + "Download"
+            + File.separator + "PaddleSensorBis"
+            + File.separator;
 
     public String getCurrentTimeStamp() {
         return new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
